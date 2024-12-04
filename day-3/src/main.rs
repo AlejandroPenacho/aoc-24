@@ -76,11 +76,7 @@ fn part_b(filename: &str) -> i64 {
 
 fn run_multiplication(x: &str) -> Option<i64> {
     let mut numbers = x.split(",");
-    let Some(Some(a)) = numbers.next().map(|x| x.parse::<i64>().ok()) else {
-        return None;
-    };
-    let Some(Some(b)) = numbers.next().map(|x| x.parse::<i64>().ok()) else {
-        return None;
-    };
+    let a = numbers.next().map(|x| x.parse::<i64>().ok()).flatten()?;
+    let b = numbers.next().map(|x| x.parse::<i64>().ok()).flatten()?;
     Some(a * b)
 }
