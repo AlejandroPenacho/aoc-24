@@ -51,7 +51,7 @@ fn part_two(grid: &Grid) {
         }
     }
 
-    println!("{:?}", new_obstacle_positions);
+    // println!("{:?}", new_obstacle_positions);
     println!("{}", new_obstacle_positions.len());
 }
 
