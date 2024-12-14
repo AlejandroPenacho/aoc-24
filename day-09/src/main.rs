@@ -1,5 +1,5 @@
 fn main() {
-    let filename = "test.txt";
+    let filename = "input.txt";
     // println!("{}", part_one(filename));
     println!("{}", part_two(filename));
 }
@@ -41,56 +41,55 @@ enum DiskSpace {
 }
 
 fn part_two(filename: &str) -> u64 {
-    let mut data = obtain_part_two_input(filename);
-    println!("{:?}", data);
+    let mut data: Vec<DiskSpace> = obtain_part_two_input(filename);
 
-    let mut output = Vec::new();
-
-    let mut index = 0;
-    let mut remaining_blank_space = None;
+    let mut i = data.len();
     loop {
-        let next_block;
-        if let Some(x) = remaining_blank_space {
-            next_block = DiskSpace::Empty(x);
-            remaining_blank_space = None;
-        } else {
-            if data.len() <= index {
-                break;
-            }
-            next_block = data[index].clone();
-            index += 1;
+        i -= 1;
+        if i == 0 {
+            break;
         }
 
-        match next_block {
-            DiskSpace::File(_, _) => output.push(next_block),
-            DiskSpace::Empty(space) => {
-                let mut block_allocated = false;
-                for i in (0..data.len()).rev() {
-                    let DiskSpace::File(file_size, _) = data[i].clone() else {
-                        continue;
-                    };
-                    if file_size > space {
-                        continue;
-                    }
-                    output.push(data[i].clone());
-                    data.remove(i);
-                    let remaining_space = space - file_size;
-                    if remaining_space != 0 {
-                        remaining_blank_space = Some(remaining_space);
-                    }
-                    block_allocated = true;
-                    break;
-                }
-                if !block_allocated {
-                    output.push(DiskSpace::Empty(space));
-                }
+        let val = data[i].clone();
+        let DiskSpace::File(file_size, _) = val.clone() else {
+            continue;
+        };
+
+        for j in 0..i {
+            let DiskSpace::Empty(empty_size) = data[j] else {
+                continue;
+            };
+            if empty_size < file_size {
+                continue;
+            }
+
+            if empty_size == file_size {
+                data[j] = val;
+            } else {
+                data[j] = DiskSpace::Empty(empty_size - file_size);
+                data.insert(j, val);
+                i += 1;
+            }
+            data[i] = DiskSpace::Empty(file_size);
+            break;
+        }
+    }
+
+    // println!("{:?}", data);
+
+    let mut value = 0;
+    let mut index = 0;
+    for space in data.iter() {
+        match space {
+            DiskSpace::Empty(x) => index += x,
+            DiskSpace::File(file_size, file_id) => {
+                value += file_id * file_size * index + file_id * file_size * (file_size - 1) / 2;
+                index += file_size;
             }
         }
     }
 
-    println!("{:?}", output);
-
-    4
+    value
 }
 
 fn obtain_part_two_input(filename: &str) -> Vec<DiskSpace> {
